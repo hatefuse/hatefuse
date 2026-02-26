@@ -39,7 +39,10 @@ exports.handler = async (event) => {
       mode: "payment",
       line_items,
       success_url: `${origin}/?success=true`,
-      cancel_url: `${origin}/?canceled=true`
+      cancel_url: `${origin}/?canceled=true`,
+      metadata: {
+        items: JSON.stringify(items)
+      }
     });
 
     return {
