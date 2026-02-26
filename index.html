@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>hatefuse</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    img {
+      width: 300px;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-15px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .text {
+      margin-top: 20px;
+      letter-spacing: 3px;
+      font-size: 12px;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+
+<body>
+
+  <img src="spin.gif" alt="3D Visual">
+
+  <div class="text">WORK IN PROGRESS. PLEASE WAIT A MOMENT...</div>
+
+  <audio id="bgMusic" loop>
+    <source src="preview.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    window.addEventListener("click", () => {
+      document.getElementById("bgMusic").play();
+    });
+  </script>
+
+</body>
+</html>
