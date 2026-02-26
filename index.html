@@ -1,216 +1,417 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>hatefuse</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>hatefuse</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <style>
-    body {
-      margin: 0;
-      background: black;
-      color: white;
-      height: 100vh;
-      overflow: hidden;
-      font-family: Arial, sans-serif;
-    }
+<style>
+body{
+margin:0;
+background:black;
+color:white;
+font-family:Arial, sans-serif;
+overflow:hidden;
+}
 
-    .screen {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 500ms ease;
-    }
+.screen{
+position:fixed;
+inset:0;
+display:flex;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+opacity:0;
+pointer-events:none;
+transition:opacity .4s ease;
+}
 
-    .screen.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
+.screen.active{
+opacity:1;
+pointer-events:auto;
+}
 
-    /* Intro Screen */
-    #spin {
-      width: 700px;
-      max-width: 90vw;
-      height: auto;
-      display: block;
-    }
+/* INTRO */
+#spin{width:700px;max-width:90vw;}
+#enter{width:600px;max-width:85vw;margin-top:30px;cursor:pointer;}
 
-    #enter {
-      width: 600px;
-      max-width: 85vw;
-      height: auto;
-      cursor: pointer;
-      margin-top: 30px;
-      user-select: none;
-      -webkit-user-drag: none;
-    }
+/* BOOT */
+.bootBox{
+width:min(560px,88vw);
+border:1px solid rgba(255,255,255,.15);
+border-radius:18px;
+padding:24px;
+text-align:center;
+background:rgba(255,255,255,.05);
+}
 
-    /* OS Container */
-    .os {
-      width: min(1100px, 94vw);
-      height: min(680px, 88vh);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 18px;
-      background: rgba(255,255,255,0.06);
-      backdrop-filter: blur(12px);
-      overflow: hidden;
-      position: relative;
-    }
+.bar{
+height:10px;
+border:1px solid rgba(255,255,255,.2);
+margin-top:15px;
+border-radius:999px;
+overflow:hidden;
+}
 
-    .topbar {
-      height: 44px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 0 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.10);
-    }
+.fill{
+height:100%;
+width:0%;
+background:white;
+transition:width 1.4s ease;
+}
 
-    .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .red { background: #ff5f57; }
-    .yellow { background: #febc2e; }
-    .green { background: #28c840; }
+/* OS */
+.os{
+width:min(1100px,94vw);
+height:min(680px,88vh);
+border:1px solid rgba(255,255,255,.12);
+border-radius:18px;
+background:rgba(255,255,255,.05);
+display:flex;
+flex-direction:column;
+overflow:hidden;
+}
 
-    .toptext {
-      margin-left: 6px;
-      letter-spacing: 1px;
-      opacity: 0.7;
-      font-size: 12px;
-    }
+.topbar{
+height:44px;
+display:flex;
+align-items:center;
+padding:0 14px;
+border-bottom:1px solid rgba(255,255,255,.1);
+font-size:12px;
+opacity:.8;
+}
 
-    .time {
-      margin-left: auto;
-      font-size: 12px;
-      opacity: 0.7;
-      letter-spacing: 1px;
-    }
+.time{margin-left:auto;}
 
-    .desktop {
-      padding: 18px;
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 16px;
-      align-content: start;
-    }
+.desktop{
+padding:20px;
+display:grid;
+grid-template-columns:repeat(6,1fr);
+gap:18px;
+}
 
-    .icon {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-    }
+.icon{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:8px;
+cursor:pointer;
+}
 
-    .iconImg {
-      width: 64px;
-      height: 64px;
-      border-radius: 16px;
-      object-fit: cover;
-      transition: transform 150ms ease;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.25);
-    }
+.icon img{
+width:64px;
+height:64px;
+border-radius:16px;
+}
 
-    .icon:hover .iconImg {
-      transform: scale(1.08);
-    }
+.iconLabel{font-size:12px;opacity:.8;}
 
-    .iconLabel {
-      font-size: 12px;
-      opacity: 0.8;
-      letter-spacing: 1px;
-    }
+/* Explorer */
+.explorer{
+flex:1;
+display:flex;
+}
 
-    /* Mobile */
-    @media (max-width: 700px) {
-      .os { height: 92vh; border-radius: 26px; }
-      .desktop { grid-template-columns: repeat(3, 1fr); }
-      .iconImg { width: 72px; height: 72px; border-radius: 18px; }
-      .toptext { display: none; }
-    }
-  </style>
+.sidebar{
+width:200px;
+border-right:1px solid rgba(255,255,255,.1);
+padding:16px;
+font-size:13px;
+opacity:.7;
+}
+
+.fileArea{
+flex:1;
+padding:16px;
+}
+
+.fileTable{
+width:100%;
+border-collapse:collapse;
+font-size:13px;
+}
+
+.fileTable th{
+text-align:left;
+padding:8px;
+border-bottom:1px solid rgba(255,255,255,.1);
+opacity:.6;
+}
+
+.fileTable td{
+padding:8px;
+border-bottom:1px solid rgba(255,255,255,.05);
+cursor:pointer;
+}
+
+.fileTable tr:hover{
+background:rgba(255,255,255,.05);
+}
+
+/* Preview */
+.previewScreen{
+background:black;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+}
+
+.previewScreen img{
+width:min(420px,80vw);
+margin-bottom:30px;
+}
+
+.previewTitle{
+font-size:18px;
+letter-spacing:2px;
+margin-bottom:10px;
+}
+
+.previewPrice{
+opacity:.7;
+margin-bottom:20px;
+}
+
+.previewBtn{
+border:1px solid white;
+padding:12px 24px;
+cursor:pointer;
+letter-spacing:2px;
+}
+
+.navTop{
+position:absolute;
+top:20px;
+left:20px;
+display:flex;
+gap:15px;
+font-size:20px;
+cursor:pointer;
+}
+
+@media(max-width:700px){
+.desktop{grid-template-columns:repeat(3,1fr);}
+.sidebar{display:none;}
+}
+</style>
 </head>
 
 <body>
 
-  <!-- INTRO -->
-  <div id="intro" class="screen active">
-    <img id="spin" src="spin.gif" alt="3D Visual" />
-    <img id="enter" src="enter.png" alt="Enter" />
-  </div>
+<!-- INTRO -->
+<div id="intro" class="screen active">
+<img id="spin" src="spin.gif">
+<img id="enter" src="enter.png">
+</div>
 
-  <!-- OS SCREEN -->
-  <div id="main" class="screen">
-    <div class="os">
-      <div class="topbar">
-        <div class="dot red"></div>
-        <div class="dot yellow"></div>
-        <div class="dot green"></div>
-        <div class="toptext">hatefuse://home</div>
-        <div class="time" id="time"></div>
-      </div>
+<!-- BOOT -->
+<div id="boot" class="screen">
+<div class="bootBox">
+BOOTING HATEFUSE OS
+<div class="bar"><div class="fill" id="bootFill"></div></div>
+</div>
+</div>
 
-      <div class="desktop">
-        <div class="icon" onclick="openLink('https://youtube.com/@hatefuse')">
-          <img src="youtube.png" class="iconImg" alt="YouTube">
-          <div class="iconLabel">YouTube</div>
-        </div>
+<!-- HOME -->
+<div id="home" class="screen">
+<div class="os">
+<div class="topbar">
+hatefuse://home
+<div class="time" id="time"></div>
+</div>
 
-        <div class="icon" onclick="openLink('https://tiktok.com/@hatefuse')">
-          <img src="tiktok.png" class="iconImg" alt="TikTok">
-          <div class="iconLabel">TikTok</div>
-        </div>
+<div class="desktop">
+<div class="icon" onclick="openExplorer()">
+<img src="folder.png">
+<div class="iconLabel">Beats</div>
+</div>
 
-        <div class="icon" onclick="openLink('https://instagram.com/hatefuse')">
-          <img src="instagram.png" class="iconImg" alt="Instagram">
-          <div class="iconLabel">Instagram</div>
-        </div>
+<div class="icon" onclick="openLink('https://youtube.com/@hatefuse')">
+<img src="youtube.png"><div class="iconLabel">YouTube</div>
+</div>
 
-        <div class="icon" onclick="openLink('https://x.com/hatefuse')">
-          <img src="twitter.png" class="iconImg" alt="Twitter">
-          <div class="iconLabel">Twitter</div>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="icon" onclick="openLink('https://tiktok.com/@hatefuse')">
+<img src="tiktok.png"><div class="iconLabel">TikTok</div>
+</div>
 
-  <!-- BEAT -->
-  <audio id="bgMusic" loop>
-    <source src="preview.mp3" type="audio/mpeg" />
-  </audio>
+<div class="icon" onclick="openLink('https://instagram.com/hatefuse')">
+<img src="instagram.png"><div class="iconLabel">Instagram</div>
+</div>
 
-  <script>
-    const intro = document.getElementById("intro");
-    const main = document.getElementById("main");
-    const enter = document.getElementById("enter");
-    const music = document.getElementById("bgMusic");
+<div class="icon" onclick="openLink('https://x.com/hatefuse')">
+<img src="twitter.png"><div class="iconLabel">Twitter</div>
+</div>
+</div>
+</div>
+</div>
 
-    function enterSite() {
-      music.play().catch(() => {});
-      intro.classList.remove("active");
-      main.classList.add("active");
-    }
+<!-- EXPLORER -->
+<div id="explorer" class="screen">
+<div class="os">
+<div class="topbar">
+hatefuse://beats
+<div class="time" id="time2"></div>
+</div>
 
-    enter.addEventListener("click", enterSite);
+<div class="explorer">
+<div class="sidebar">
+Favorites<br><br>
+Beats<br>
+Archive<br>
+Trash
+</div>
 
-    function openLink(url) {
-      window.open(url, "_blank", "noopener,noreferrer");
-    }
+<div class="fileArea">
+<table class="fileTable">
+<tr><th>Name</th><th>Type</th><th>Size</th><th>Date</th></tr>
 
-    function updateTime() {
-      const el = document.getElementById("time");
-      const d = new Date();
-      el.textContent = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    }
+<tr ondblclick="openPreview('001 @hatefuse','beats/beat1_preview.mp3','beats/cover1.png')">
+<td>001 @hatefuse.wav</td>
+<td>WAV File</td>
+<td>17.8 MB</td>
+<td>Today</td>
+</tr>
 
-    updateTime();
-    setInterval(updateTime, 1000);
-  </script>
+<tr ondblclick="openPreview('002 @hatefuse','beats/beat2_preview.mp3','beats/cover2.png')">
+<td>002 @hatefuse.wav</td>
+<td>WAV File</td>
+<td>15 MB</td>
+<td>Today</td>
+</tr>
+
+</table>
+</div>
+</div>
+</div>
+</div>
+
+<!-- PREVIEW -->
+<div id="preview" class="screen previewScreen">
+<div class="navTop">
+<span onclick="backToExplorer()">←</span>
+<span onclick="backToHome()">⌂</span>
+</div>
+
+<img id="coverImg">
+<div class="previewTitle" id="previewTitle"></div>
+<div class="previewPrice">$40</div>
+<div class="previewBtn" onclick="buy()">BUY</div>
+</div>
+
+<!-- AUDIO -->
+<audio id="bgMusic" loop>
+<source src="preview.mp3">
+</audio>
+
+<audio id="beatPreview"></audio>
+
+<audio id="clickSound">
+<source src="sounds/click.mp3">
+</audio>
+
+<audio id="startupSound">
+<source src="sounds/startup.mp3">
+</audio>
+
+<script>
+const intro=document.getElementById("intro");
+const boot=document.getElementById("boot");
+const home=document.getElementById("home");
+const explorer=document.getElementById("explorer");
+const preview=document.getElementById("preview");
+const music=document.getElementById("bgMusic");
+const beatPreview=document.getElementById("beatPreview");
+const clickSound=document.getElementById("clickSound");
+const startupSound=document.getElementById("startupSound");
+const bootFill=document.getElementById("bootFill");
+
+document.getElementById("enter").onclick=()=>{
+clickSound.play().catch(()=>{});
+intro.classList.remove("active");
+boot.classList.add("active");
+requestAnimationFrame(()=>bootFill.style.width="100%");
+startupSound.play().catch(()=>{});
+
+setTimeout(()=>{
+boot.classList.remove("active");
+home.classList.add("active");
+
+let step=0;
+const fade=setInterval(()=>{
+step++;
+startupSound.volume=1-(step/25);
+if(step>=25){
+clearInterval(fade);
+startupSound.pause();
+startupSound.currentTime=0;
+music.volume=0;
+music.play().catch(()=>{});
+let v=0;
+const fadeIn=setInterval(()=>{
+v+=.05;
+if(v>=1){v=1;clearInterval(fadeIn);}
+music.volume=v;
+},120);
+}
+},40);
+
+},1400);
+};
+
+function openLink(url){
+clickSound.play().catch(()=>{});
+window.open(url,"_blank");
+}
+
+function openExplorer(){
+clickSound.play().catch(()=>{});
+home.classList.remove("active");
+explorer.classList.add("active");
+}
+
+function backToHome(){
+clickSound.play().catch(()=>{});
+preview.classList.remove("active");
+explorer.classList.remove("active");
+home.classList.add("active");
+beatPreview.pause();
+music.play();
+}
+
+function backToExplorer(){
+clickSound.play().catch(()=>{});
+preview.classList.remove("active");
+explorer.classList.add("active");
+beatPreview.pause();
+music.play();
+}
+
+function openPreview(title,audioSrc,coverSrc){
+explorer.classList.remove("active");
+preview.classList.add("active");
+document.getElementById("previewTitle").innerText=title;
+document.getElementById("coverImg").src=coverSrc;
+music.pause();
+beatPreview.src=audioSrc;
+beatPreview.play().catch(()=>{});
+}
+
+function buy(){
+alert("Add PayPal link here");
+}
+
+function updateTime(){
+const d=new Date();
+document.getElementById("time").innerText=
+d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+document.getElementById("time2").innerText=
+d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+}
+setInterval(updateTime,1000);
+updateTime();
+</script>
 
 </body>
 </html>
