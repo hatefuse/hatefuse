@@ -3,6 +3,7 @@
 <head>
   <title>hatefuse</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <style>
     body {
       margin: 0;
@@ -31,6 +32,7 @@
       pointer-events: auto;
     }
 
+    /* Intro Screen */
     #spin {
       width: 700px;
       max-width: 90vw;
@@ -47,20 +49,137 @@
       user-select: none;
       -webkit-user-drag: none;
     }
+
+    /* OS Container */
+    .os {
+      width: min(1100px, 94vw);
+      height: min(680px, 88vh);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 18px;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .topbar {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .red { background: #ff5f57; }
+    .yellow { background: #febc2e; }
+    .green { background: #28c840; }
+
+    .toptext {
+      margin-left: 6px;
+      letter-spacing: 1px;
+      opacity: 0.7;
+      font-size: 12px;
+    }
+
+    .time {
+      margin-left: auto;
+      font-size: 12px;
+      opacity: 0.7;
+      letter-spacing: 1px;
+    }
+
+    .desktop {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 16px;
+      align-content: start;
+    }
+
+    .icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .iconImg {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      object-fit: cover;
+      transition: transform 150ms ease;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.25);
+    }
+
+    .icon:hover .iconImg {
+      transform: scale(1.08);
+    }
+
+    .iconLabel {
+      font-size: 12px;
+      opacity: 0.8;
+      letter-spacing: 1px;
+    }
+
+    /* Mobile */
+    @media (max-width: 700px) {
+      .os { height: 92vh; border-radius: 26px; }
+      .desktop { grid-template-columns: repeat(3, 1fr); }
+      .iconImg { width: 72px; height: 72px; border-radius: 18px; }
+      .toptext { display: none; }
+    }
   </style>
 </head>
 
 <body>
 
+  <!-- INTRO -->
   <div id="intro" class="screen active">
     <img id="spin" src="spin.gif" alt="3D Visual" />
     <img id="enter" src="enter.png" alt="Enter" />
   </div>
 
+  <!-- OS SCREEN -->
   <div id="main" class="screen">
-    <h1 style="letter-spacing: 2px;">hatefuse</h1>
+    <div class="os">
+      <div class="topbar">
+        <div class="dot red"></div>
+        <div class="dot yellow"></div>
+        <div class="dot green"></div>
+        <div class="toptext">hatefuse://home</div>
+        <div class="time" id="time"></div>
+      </div>
+
+      <div class="desktop">
+        <div class="icon" onclick="openLink('https://youtube.com/@hatefuse')">
+          <img src="youtube.png" class="iconImg" alt="YouTube">
+          <div class="iconLabel">YouTube</div>
+        </div>
+
+        <div class="icon" onclick="openLink('https://tiktok.com/@hatefuse')">
+          <img src="tiktok.png" class="iconImg" alt="TikTok">
+          <div class="iconLabel">TikTok</div>
+        </div>
+
+        <div class="icon" onclick="openLink('https://instagram.com/hatefuse')">
+          <img src="instagram.png" class="iconImg" alt="Instagram">
+          <div class="iconLabel">Instagram</div>
+        </div>
+
+        <div class="icon" onclick="openLink('https://x.com/hatefuse')">
+          <img src="twitter.png" class="iconImg" alt="Twitter">
+          <div class="iconLabel">Twitter</div>
+        </div>
+      </div>
+    </div>
   </div>
 
+  <!-- BEAT -->
   <audio id="bgMusic" loop>
     <source src="preview.mp3" type="audio/mpeg" />
   </audio>
@@ -79,9 +198,18 @@
 
     enter.addEventListener("click", enterSite);
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") enterSite();
-    });
+    function openLink(url) {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+
+    function updateTime() {
+      const el = document.getElementById("time");
+      const d = new Date();
+      el.textContent = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    updateTime();
+    setInterval(updateTime, 1000);
   </script>
 
 </body>
