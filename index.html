@@ -13,12 +13,12 @@
       font-family: Arial, sans-serif;
       overflow: hidden;
       height: 100vh;
-      background: #000 url('hatefuse-bg.webp') no-repeat center center fixed;
+      background: #000 url('hatefuse-bg.webp') no-repeat center center;
       background-size: cover;
+      background-attachment: fixed;
       position: relative;
     }
-    body::after {
-      content: "";
+    #bg-overlay {
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.65);
@@ -182,16 +182,11 @@
     .cartBtn { cursor: pointer; margin-left: auto; margin-right: 10px; user-select: none; font-size: 18px; }
     #cartOverlay .bootBox { text-align: left; width: min(720px,92vw); max-height: 80vh; overflow-y: auto; }
     .cart-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.08); }
-
-    /* Fix background on mobile (iPhone/Safari bug with fixed + cover) */
-    @media (max-width: 768px) {
-      body {
-        background-attachment: scroll !important;
-      }
-    }
   </style>
 </head>
 <body>
+  <div id="bg-overlay"></div>
+
   <div id="intro" class="screen active">
     <img id="spin" src="spin.gif" alt="Loading animation">
     <img id="enter" src="enter.png" alt="Click to enter">
