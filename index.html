@@ -182,6 +182,13 @@
     .cartBtn { cursor: pointer; margin-left: auto; margin-right: 10px; user-select: none; font-size: 18px; }
     #cartOverlay .bootBox { text-align: left; width: min(720px,92vw); max-height: 80vh; overflow-y: auto; }
     .cart-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+
+    /* Fix background on mobile (iPhone/Safari bug with fixed + cover) */
+    @media (max-width: 768px) {
+      body {
+        background-attachment: scroll !important;
+      }
+    }
   </style>
 </head>
 <body>
