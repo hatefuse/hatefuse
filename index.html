@@ -1,278 +1,252 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>hatefuse</title>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
+  <title>hatefuse</title>
+  <meta name="description" content="Exclusive trap beats direct from @hatefuse. No middleman. WAV leases & exclusives. Florida heat.">
+  <link rel="icon" href="favicon.png" type="image/png">
   <style>
-    body{
-      margin:0;
-      background:black;
-      color:white;
-      font-family:Arial, sans-serif;
-      overflow:hidden;
+    body {
+      margin: 0;
+      color: white;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      background: #000 url('hatefuse-bg.webp') no-repeat center center fixed;
+      background-size: cover;
+      position: relative;
     }
-
-    .screen{
-      position:fixed;
-      inset:0;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      flex-direction:column;
-      opacity:0;
-      pointer-events:none;
-      transition:opacity .4s ease;
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      pointer-events: none;
+      z-index: -2;
     }
-
-    .screen.active{
-      opacity:1;
-      pointer-events:auto;
+    .screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      z-index: 1;
     }
-
-    /* INTRO */
-    #spin{width:700px;max-width:90vw;}
-    #enter{width:600px;max-width:85vw;margin-top:30px;cursor:pointer;}
-
-    /* BOOT + CART BOX STYLE */
-    .bootBox{
-      width:min(560px,88vw);
-      border:1px solid rgba(255,255,255,.15);
-      border-radius:18px;
-      padding:24px;
-      text-align:center;
-      background:rgba(255,255,255,.05);
+    .screen.active {
+      opacity: 1;
+      pointer-events: auto;
     }
-
-    .bar{
-      height:10px;
-      border:1px solid rgba(255,255,255,.2);
-      margin-top:15px;
-      border-radius:999px;
-      overflow:hidden;
+    #spin { width: 700px; max-width: 90vw; }
+    #enter { width: 600px; max-width: 85vw; margin-top: 30px; cursor: pointer; }
+    #enter:hover { opacity: 0.9; }
+    .bootBox {
+      width: min(560px,88vw);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 18px;
+      padding: 24px;
+      text-align: center;
+      background: rgba(255,255,255,.05);
     }
-
-    .fill{
-      height:100%;
-      width:0%;
-      background:white;
-      transition:width 1.4s ease;
+    .bar {
+      height: 10px;
+      border: 1px solid rgba(255,255,255,.2);
+      margin-top: 15px;
+      border-radius: 999px;
+      overflow: hidden;
     }
-
-    /* OS */
-    .os{
-      width:min(1100px,94vw);
-      height:min(680px,88vh);
-      border:1px solid rgba(255,255,255,.12);
-      border-radius:18px;
-      background:rgba(255,255,255,.05);
-      display:flex;
-      flex-direction:column;
-      overflow:hidden;
+    .fill {
+      height: 100%;
+      width: 0%;
+      background: white;
+      transition: width 1.4s ease;
     }
-
-    .topbar{
-      height:44px;
-      display:flex;
-      align-items:center;
-      padding:0 14px;
-      border-bottom:1px solid rgba(255,255,255,.1);
-      font-size:12px;
-      opacity:.85;
-      gap:10px;
+    .os {
+      width: min(1100px,94vw);
+      height: min(680px,88vh);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      background: rgba(255,255,255,.05);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 2;
     }
-
-    .time{ margin-left:auto; }
-
-    .desktop{
-      padding:20px;
-      display:grid;
-      grid-template-columns:repeat(6,1fr);
-      gap:18px;
+    .topbar {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      font-size: 12px;
+      opacity: .85;
+      gap: 10px;
     }
-
-    .icon{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:8px;
-      cursor:pointer;
-      user-select:none;
+    .time { margin-left: auto; }
+    .desktop {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(80px,1fr));
+      gap: 18px;
+      overflow-y: auto;
     }
-
-    .icon img{
-      width:64px;
-      height:64px;
-      border-radius:16px;
+    .icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+      transition: transform .2s;
     }
-
-    .iconLabel{font-size:12px;opacity:.8;}
-
-    /* Explorer */
-    .explorer{
-      flex:1;
-      display:flex;
+    .icon:hover { transform: scale(1.1); }
+    .icon img {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      box-shadow: 0 0 10px rgba(0,255,157,.3);
     }
-
-    .sidebar{
-      width:200px;
-      border-right:1px solid rgba(255,255,255,.1);
-      padding:16px;
-      font-size:13px;
-      opacity:.7;
+    .iconLabel { font-size: 12px; opacity: .8; text-align: center; }
+    .explorer { flex: 1; display: flex; position: relative; }
+    .sidebar {
+      width: 200px;
+      border-right: 1px solid rgba(255,255,255,.1);
+      padding: 16px;
+      font-size: 13px;
+      opacity: .7;
     }
-
-    .fileArea{
-      flex:1;
-      padding:16px;
+    .fileArea { flex: 1; padding: 16px; overflow: auto; }
+    .fileTable {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
     }
-
-    .fileTable{
-      width:100%;
-      border-collapse:collapse;
-      font-size:13px;
+    .fileTable th,.fileTable td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,.05);
     }
-
-    .fileTable th{
-      text-align:left;
-      padding:8px;
-      border-bottom:1px solid rgba(255,255,255,.1);
-      opacity:.6;
+    .fileTable th { opacity: .6; }
+    .fileTable tr:hover { background: rgba(255,255,255,.05); cursor: pointer; }
+    @media (max-width:700px) {
+      .sidebar { display: none; }
+      .fileTable { font-size: 12px; }
+      .desktop { grid-template-columns: repeat(3,1fr); }
     }
-
-    .fileTable td{
-      padding:8px;
-      border-bottom:1px solid rgba(255,255,255,.05);
-      cursor:pointer;
+    .previewScreen {
+      background: black;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
     }
-
-    .fileTable tr:hover{
-      background:rgba(255,255,255,.05);
+    .previewScreen img {
+      width: min(420px,80vw);
+      margin-bottom: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,255,157,.2);
     }
-
-    /* Preview */
-    .previewScreen{
-      background:black;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-      text-align:center;
+    .previewTitle { font-size: 22px; letter-spacing: 2px; margin-bottom: 10px; }
+    .previewPrice { opacity: .7; margin-bottom: 20px; font-size: 18px; }
+    .previewBtn {
+      border: 1px solid white;
+      padding: 12px 24px;
+      cursor: pointer;
+      letter-spacing: 2px;
+      user-select: none;
+      transition: all .3s;
+      margin: 8px;
     }
-
-    .previewScreen img{
-      width:min(420px,80vw);
-      margin-bottom:30px;
+    .previewBtn:hover {
+      background: rgba(0,255,157,.15);
+      border-color: #00ff9d;
+      color: #00ff9d;
     }
-
-    .previewTitle{
-      font-size:18px;
-      letter-spacing:2px;
-      margin-bottom:10px;
+    audio { width: 80%; max-width: 400px; margin: 20px 0; }
+    .navTop {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      gap: 20px;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 10;
     }
-
-    .previewPrice{
-      opacity:.7;
-      margin-bottom:20px;
-    }
-
-    .previewBtn{
-      border:1px solid white;
-      padding:12px 24px;
-      cursor:pointer;
-      letter-spacing:2px;
-      user-select:none;
-    }
-
-    .navTop{
-      position:absolute;
-      top:20px;
-      left:20px;
-      display:flex;
-      gap:15px;
-      font-size:20px;
-      cursor:pointer;
-      user-select:none;
-    }
-
-    /* Cart Icon */
-    .cartBtn{
-      cursor:pointer;
-      margin-left:auto;
-      margin-right:10px;
-      user-select:none;
-    }
-
-    @media(max-width:700px){
-      .desktop{grid-template-columns:repeat(3,1fr);}
-      .sidebar{display:none;}
-    }
+    .cartBtn { cursor: pointer; margin-left: auto; margin-right: 10px; user-select: none; font-size: 18px; }
+    #cartOverlay .bootBox { text-align: left; width: min(720px,92vw); max-height: 80vh; overflow-y: auto; }
+    .cart-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.08); }
   </style>
 </head>
-
 <body>
-
-  <!-- INTRO -->
   <div id="intro" class="screen active">
-    <img id="spin" src="spin.gif">
-    <img id="enter" src="enter.png">
+    <img id="spin" src="spin.gif" alt="Loading animation">
+    <img id="enter" src="enter.png" alt="Click to enter">
   </div>
 
-  <!-- BOOT -->
   <div id="boot" class="screen">
     <div class="bootBox">
-      BOOTING HATEFUSE OS
+      Loading....
       <div class="bar"><div class="fill" id="bootFill"></div></div>
     </div>
   </div>
 
-  <!-- HOME -->
   <div id="home" class="screen">
     <div class="os">
       <div class="topbar">
         hatefuse://home
-
         <span class="cartBtn" onclick="openCart()">🛒 <span id="cartCount">0</span></span>
-
         <div class="time" id="time"></div>
       </div>
-
       <div class="desktop">
-        <div class="icon" onclick="openExplorer()">
-          <img src="folder.png">
+        <div class="icon" onclick="openExplorer()" tabindex="0">
+          <img src="folder.png" alt="Beats folder">
           <div class="iconLabel">Beats</div>
         </div>
-
-        <div class="icon" onclick="openLink('https://youtube.com/@hatefuse')">
-          <img src="youtube.png"><div class="iconLabel">YouTube</div>
+        <div class="icon" onclick="openLink('https://youtube.com/@hatefuse')" tabindex="0">
+          <img src="youtube.png" alt="YouTube">
+          <div class="iconLabel">YouTube</div>
         </div>
-
-        <div class="icon" onclick="openLink('https://tiktok.com/@hatefuse')">
-          <img src="tiktok.png"><div class="iconLabel">TikTok</div>
+        <div class="icon" onclick="openLink('https://tiktok.com/@hatefuse')" tabindex="0">
+          <img src="tiktok.png" alt="TikTok">
+          <div class="iconLabel">TikTok</div>
         </div>
-
-        <div class="icon" onclick="openLink('https://instagram.com/hatefuse')">
-          <img src="instagram.png"><div class="iconLabel">Instagram</div>
+        <div class="icon" onclick="openLink('https://instagram.com/hatefuse')" tabindex="0">
+          <img src="instagram.png" alt="Instagram">
+          <div class="iconLabel">Instagram</div>
         </div>
-
-        <div class="icon" onclick="openLink('https://x.com/hatefuse')">
-          <img src="twitter.png"><div class="iconLabel">Twitter</div>
+        <div class="icon" onclick="openLink('https://x.com/hatefuse')" tabindex="0">
+          <img src="twitter.png" alt="Twitter">
+          <div class="iconLabel">Twitter</div>
+        </div>
+        <div class="icon" onclick="openLink('https://tumblr.com/hatefuse')" tabindex="0">
+          <img src="tumblr.png" alt="Tumblr">
+          <div class="iconLabel">Tumblr</div>
+        </div>
+        <div class="icon" onclick="openLink('https://www.pinterest.com/hatefantasies')" tabindex="0">
+          <img src="pinterest.png" alt="Pinterest">
+          <div class="iconLabel">Pinterest</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- EXPLORER -->
   <div id="explorer" class="screen">
+    <div class="navTop" style="position: absolute; top: 20px; left: 20px; z-index: 30;">
+      <span onclick="backToHome()">⌂</span>
+    </div>
     <div class="os">
       <div class="topbar">
         hatefuse://beats
-
         <span class="cartBtn" onclick="openCart()">🛒 <span id="cartCount2">0</span></span>
-
         <div class="time" id="time2"></div>
       </div>
-
       <div class="explorer">
         <div class="sidebar">
           Favorites<br><br>
@@ -280,295 +254,93 @@
           Archive<br>
           Trash
         </div>
-
         <div class="fileArea">
           <table class="fileTable">
-            <tr><th>Name</th><th>Type</th><th>Size</th><th>Date</th></tr>
-
-            <tr ondblclick="openPreview('001 @hatefuse','beats/beat1_preview.mp3','beats/cover1.png')">
-              <td>001 @hatefuse.wav</td><td>WAV File</td><td>34 MB</td><td>Today</td>
-            </tr>
-
-            <tr ondblclick="openPreview('002 @hatefuse','beats/beat2_preview.mp3','beats/cover2.png')">
-              <td>002 @hatefuse.wav</td><td>WAV File</td><td>31 MB</td><td>Today</td>
-            </tr>
+            <thead>
+              <tr><th>Name</th><th>Type</th><th>Size</th><th>Date</th></tr>
+            </thead>
+            <tbody>
+              <tr ondblclick="openPreview('001 @hatefuse','beats/beat1_preview.mp3','beats/cover1.png',40,100)">
+                <td>001 @hatefuse.wav</td><td>WAV File</td><td>18 MB</td><td>Today</td>
+              </tr>
+              <tr ondblclick="openPreview('002 @hatefuse','beats/beat2_preview.mp3','beats/cover2.png',40,100)">
+                <td>002 @hatefuse.wav</td><td>WAV File</td><td>15 MB</td><td>Today</td>
+              </tr>
+              <tr ondblclick="openPreview('003 @hatefuse','beats/beat3_preview.mp3','beats/cover3.png',40,100)">
+                <td>003 @hatefuse.wav</td><td>WAV File</td><td>17 MB</td><td>Yesterday</td>
+              </tr>
+              <tr ondblclick="openPreview('004 @hatefuse','beats/beat4_preview.mp3','beats/cover4.png',40,100)">
+                <td>004 @hatefuse.wav</td><td>WAV File</td><td>19 MB</td><td>2 days ago</td>
+              </tr>
+              <tr ondblclick="openPreview('005 @hatefuse','beats/beat5_preview.mp3','beats/cover5.png',40,100)">
+                <td>005 @hatefuse.wav</td><td>WAV File</td><td>18 MB</td><td>3 days ago</td>
+              </tr>
+              <tr ondblclick="openPreview('006 @hatefuse','beats/beat6_preview.mp3','beats/cover6.png',40,100)">
+                <td>006 @hatefuse.wav</td><td>WAV File</td><td>26 MB</td><td>4 days ago</td>
+              </tr>
+              <tr ondblclick="openPreview('007 @hatefuse @butcheraidan @moveii11','beats/beat7_preview.mp3','beats/cover7.png',80,160)">
+                <td>007 @hatefuse @butcheraidan @moveii11.wav</td><td>WAV File</td><td>18 MB</td><td>Last week</td>
+              </tr>
+              <tr ondblclick="openPreview('008 @hatefuse @1twovrt','beats/beat8_preview.mp3','beats/cover8.png',100,200)">
+                <td>008 @hatefuse @1twovrt.wav</td><td>WAV File</td><td>17 MB</td><td>Last week</td>
+              </tr>
+              <tr ondblclick="openPreview('009 @hatefuse @2azuna','beats/beat9_preview.mp3','beats/cover9.png',80,160)">
+                <td>009 @hatefuse @2azuna.wav</td><td>WAV File</td><td>26 MB</td><td>2 weeks ago</td>
+              </tr>
+              <tr ondblclick="openPreview('010 @hatefuse @prodtob','beats/beat10_preview.mp3','beats/cover10.png',80,160)">
+                <td>010 @hatefuse @prodtob.wav</td><td>WAV File</td><td>42 MB</td><td>2 weeks ago</td>
+              </tr>
+            </tbody>
           </table>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- PREVIEW -->
   <div id="preview" class="screen previewScreen">
     <div class="navTop">
       <span onclick="backToExplorer()">←</span>
       <span onclick="backToHome()">⌂</span>
     </div>
-
-    <img id="coverImg">
+    <img id="coverImg" alt="Beat cover art">
     <div class="previewTitle" id="previewTitle"></div>
-    <div class="previewPrice">WAV $40 • EXCL $100</div>
-
-    <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
-      <div class="previewBtn" onclick="addToCart('WAV')">ADD WAV LEASE $40</div>
-      <div class="previewBtn" onclick="addToCart('EXCL')">ADD EXCLUSIVE $100</div>
+    <div class="previewPrice" id="previewPrice">WAV Lease $40 • Exclusive $100</div>
+    <audio id="previewPlayer" controls>
+      <source id="previewSrc" src="" type="audio/mpeg">
+    </audio>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+      <div class="previewBtn" onclick="addToCart('WAV')">ADD WAV LEASE</div>
+      <div class="previewBtn" onclick="addToCart('EXCL')">ADD EXCLUSIVE</div>
     </div>
   </div>
 
-  <!-- CART OVERLAY -->
-  <div id="cartOverlay" class="screen" style="background: rgba(0,0,0,0.92);">
-    <div class="bootBox" style="text-align:left; width:min(720px,92vw);">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div style="letter-spacing:2px;">CART</div>
-        <div style="cursor:pointer; font-size:20px;" onclick="closeCart()">×</div>
+  <div id="cartOverlay" class="screen" style="background:rgba(0,0,0,.92);">
+    <div class="bootBox">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="letter-spacing:2px;font-size:18px;">CART</div>
+        <div style="cursor:pointer;font-size:24px;" onclick="closeCart()">×</div>
       </div>
-
-      <div id="cartItems" style="margin-top:14px;"></div>
-
-      <div style="margin-top:14px; display:flex; justify-content:space-between; align-items:center;">
-        <div style="opacity:.8; letter-spacing:1px;">TOTAL: $<span id="cartTotal">0</span></div>
-        <div class="previewBtn" onclick="checkout()">CHECKOUT</div>
+      <div id="cartItems"></div>
+      <div style="margin-top:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <div style="opacity:.8;letter-spacing:1px;">TOTAL: $<span id="cartTotal">0</span></div>
+        <div style="display:flex;gap:12px;">
+          <div class="previewBtn" style="font-size:14px;" onclick="clearCart()">Clear Cart</div>
+          <div class="previewBtn" onclick="checkout()">CHECKOUT</div>
+        </div>
       </div>
-
-      <div style="margin-top:10px; font-size:11px; opacity:.6;">
-        Payments handled by Stripe (Card / Apple Pay / Google Pay).
+      <div style="margin-top:12px;font-size:11px;opacity:.6;text-align:center;">
+        Payments via Stripe (Card / Apple Pay / Google Pay). Download + license emailed after success.
       </div>
     </div>
   </div>
 
-  <!-- AUDIO -->
-  <audio id="bgMusic" loop preload="none">
-    <source src="preview.mp3">
-  </audio>
-
+  <audio id="bgMusic" loop preload="none"><source src="preview.mp3" type="audio/mpeg"></audio>
   <audio id="beatPreview" preload="none"></audio>
-
-  <audio id="clickSound" preload="auto">
-    <source src="sounds/click.mp3">
-  </audio>
-
-  <audio id="startupSound" preload="auto">
-    <source src="sounds/startup.mp3">
-  </audio>
+  <audio id="clickSound" preload="auto"><source src="sounds/click.mp3" type="audio/mpeg"></audio>
+  <audio id="startupSound" preload="auto"><source src="sounds/startup.mp3" type="audio/mpeg"></audio>
 
   <script>
-    const intro=document.getElementById("intro");
-    const boot=document.getElementById("boot");
-    const home=document.getElementById("home");
-    const explorer=document.getElementById("explorer");
-    const preview=document.getElementById("preview");
-
-    const music=document.getElementById("bgMusic");
-    const beatPreview=document.getElementById("beatPreview");
-    const clickSound=document.getElementById("clickSound");
-    const startupSound=document.getElementById("startupSound");
-    const bootFill=document.getElementById("bootFill");
-
-    // Cart state
-    let cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    let currentBeat = { id: null, name: null };
-    const PRICE_WAV = 40;
-    const PRICE_EXCL = 100;
-
-    // ENTER → BOOT → HOME (startup fades out → 2s silence → background fades in)
-    document.getElementById("enter").onclick=()=>{
-      try { clickSound.currentTime=0; clickSound.play().catch(()=>{}); } catch(e) {}
-
-      intro.classList.remove("active");
-      boot.classList.add("active");
-      requestAnimationFrame(()=>bootFill.style.width="100%");
-
-      try { startupSound.volume=1; startupSound.currentTime=0; startupSound.play().catch(()=>{}); } catch(e) {}
-
-      setTimeout(()=>{
-        // Fade OUT startup
-        let step=0;
-        const fadeOut = setInterval(()=>{
-          step++;
-          try { startupSound.volume = Math.max(0, 1-(step/25)); } catch(e) {}
-          if(step>=25){
-            clearInterval(fadeOut);
-            try { startupSound.pause(); startupSound.currentTime=0; } catch(e) {}
-
-            // 2 seconds silence
-            setTimeout(()=>{
-              boot.classList.remove("active");
-              home.classList.add("active");
-
-              // Fade IN background melody
-              try {
-                music.volume=0;
-                music.play().catch(()=>{});
-                let v=0;
-                const fadeIn=setInterval(()=>{
-                  v+=.05;
-                  if(v>=1){v=1;clearInterval(fadeIn);}
-                  music.volume=v;
-                },120);
-              } catch(e) {}
-
-            }, 2000);
-          }
-        },40);
-
-      },1400);
-    };
-
-    function sfx(){
-      try { clickSound.currentTime=0; clickSound.play().catch(()=>{}); } catch(e) {}
-    }
-
-    function openLink(url){
-      sfx();
-      window.open(url,"_blank");
-    }
-
-    function openExplorer(){
-      sfx();
-      home.classList.remove("active");
-      explorer.classList.add("active");
-    }
-
-    function backToHome(){
-      sfx();
-      preview.classList.remove("active");
-      explorer.classList.remove("active");
-      home.classList.add("active");
-      try { beatPreview.pause(); beatPreview.currentTime=0; } catch(e) {}
-      try { music.play().catch(()=>{}); } catch(e) {}
-    }
-
-    function backToExplorer(){
-      sfx();
-      preview.classList.remove("active");
-      explorer.classList.add("active");
-      try { beatPreview.pause(); beatPreview.currentTime=0; } catch(e) {}
-      try { music.play().catch(()=>{}); } catch(e) {}
-    }
-
-    function openPreview(title,audioSrc,coverSrc){
-      explorer.classList.remove("active");
-      preview.classList.add("active");
-
-      document.getElementById("previewTitle").innerText=title;
-      document.getElementById("coverImg").src=coverSrc;
-
-      // Set current beat for cart
-      currentBeat.id = title;
-      currentBeat.name = title;
-
-      // Pause background, play preview
-      try { music.pause(); } catch(e) {}
-      beatPreview.src=audioSrc;
-      beatPreview.play().catch(()=>{});
-    }
-
-    // CART FUNCTIONS
-    function saveCart(){
-      localStorage.setItem("cart", JSON.stringify(cart));
-      updateCartUI();
-    }
-
-    function updateCartUI(){
-      const count = cart.length;
-      const c1 = document.getElementById("cartCount");
-      const c2 = document.getElementById("cartCount2");
-      if(c1) c1.textContent = count;
-      if(c2) c2.textContent = count;
-
-      const total = cart.reduce((s, it) => s + it.price, 0);
-      const totalEl = document.getElementById("cartTotal");
-      if(totalEl) totalEl.textContent = total;
-
-      const list = document.getElementById("cartItems");
-      if(list){
-        if(cart.length === 0){
-          list.innerHTML = `<div style="opacity:.7; margin-top:10px;">Cart is empty.</div>`;
-        } else {
-          list.innerHTML = cart.map((it, idx) => `
-            <div style="display:flex; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.08);">
-              <div>
-                <div style="letter-spacing:1px;">${it.name}</div>
-                <div style="opacity:.65; font-size:12px;">${it.license}</div>
-              </div>
-              <div style="display:flex; gap:12px; align-items:center;">
-                <div style="opacity:.9;">$${it.price}</div>
-                <div style="cursor:pointer; opacity:.7;" onclick="removeCartItem(${idx})">Remove</div>
-              </div>
-            </div>
-          `).join("");
-        }
-      }
-    }
-
-    function openCart(){
-      sfx();
-      document.getElementById("cartOverlay").classList.add("active");
-      updateCartUI();
-    }
-
-    function closeCart(){
-      sfx();
-      document.getElementById("cartOverlay").classList.remove("active");
-    }
-
-    function removeCartItem(i){
-      cart.splice(i,1);
-      saveCart();
-    }
-
-    function addToCart(type){
-      if(!currentBeat.id) return;
-
-      const license = (type === "EXCL") ? "Exclusive" : "WAV Lease";
-      const price = (type === "EXCL") ? PRICE_EXCL : PRICE_WAV;
-
-      // Replace automatically (only one license per beat)
-      cart = cart.filter(it => it.beatId !== currentBeat.id);
-      cart.push({ beatId: currentBeat.id, name: currentBeat.name, license, price });
-
-      saveCart();
-      openCart();
-    }
-
-    async function checkout(){
-      if(cart.length === 0){
-        alert("Cart is empty.");
-        return;
-      }
-
-      // Pause audio before redirect
-      try { music.pause(); } catch(e) {}
-      try { beatPreview.pause(); } catch(e) {}
-
-      const res = await fetch("/.netlify/functions/create-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: cart })
-      });
-
-      const data = await res.json();
-      if(!res.ok || !data.url){
-        alert("Checkout error: " + (data.error || "unknown"));
-        return;
-      }
-
-      window.location.href = data.url;
-    }
-
-    // Clock
-    function updateTime(){
-      const d=new Date();
-      const t = d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
-      document.getElementById("time").innerText = t;
-      document.getElementById("time2").innerText = t;
-    }
-    setInterval(updateTime,1000);
-    updateTime();
-
-    // init cart UI
-    updateCartUI();
+const screens={intro:document.getElementById("intro"),boot:document.getElementById("boot"),home:document.getElementById("home"),explorer:document.getElementById("explorer"),preview:document.getElementById("preview"),cartOverlay:document.getElementById("cartOverlay")},music=document.getElementById("bgMusic"),beatPreview=document.getElementById("beatPreview"),previewPlayer=document.getElementById("previewPlayer"),previewSrc=document.getElementById("previewSrc"),clickSound=document.getElementById("clickSound"),startupSound=document.getElementById("startupSound"),bootFill=document.getElementById("bootFill");let cart=JSON.parse(localStorage.getItem("cart")||"[]"),currentBeat={id:null,name:null,priceWav:40,priceExcl:100};const urlParams=new URLSearchParams(window.location.search);if(urlParams.has("session_id")){screens.intro.classList.remove("active"),screens.boot.classList.remove("active"),screens.home.classList.add("active"),setTimeout(()=>{alert("Payment successful! 🔥 Your download & license are being emailed. Check spam if not in 10 mins.")},500),history.replaceState(null,null,window.location.pathname)}document.getElementById("enter").onclick=()=>{clickSound.currentTime=0,clickSound.play().catch(()=>{}),screens.intro.classList.remove("active"),screens.boot.classList.add("active"),bootFill.style.width="100%",startupSound.volume=1,startupSound.currentTime=0,startupSound.play().catch(()=>{}),setTimeout(()=>{let step=0;const fadeOut=setInterval(()=>{step++,startupSound.volume=Math.max(0,1-step/25),step>=25&&(clearInterval(fadeOut),startupSound.pause(),startupSound.currentTime=0,setTimeout(()=>{screens.boot.classList.remove("active"),screens.home.classList.add("active"),music.volume=0,music.play().catch(()=>{});let v=0;const fadeIn=setInterval(()=>{v+=.05,music.volume=v,v>=1&&clearInterval(fadeIn)},120)},2e3))},40)},1400)};function sfx(){clickSound.currentTime=0,clickSound.play().catch(()=>{})}function openLink(e){sfx(),window.open(e,"_blank")}function openExplorer(){sfx(),screens.home.classList.remove("active"),screens.explorer.classList.add("active")}function backToHome(){sfx(),screens.preview.classList.remove("active"),screens.explorer.classList.remove("active"),screens.home.classList.add("active"),beatPreview.pause(),beatPreview.currentTime=0,previewPlayer.pause(),previewPlayer.currentTime=0,music.play().catch(()=>{})}function backToExplorer(){sfx(),screens.preview.classList.remove("active"),screens.explorer.classList.add("active"),beatPreview.pause(),beatPreview.currentTime=0,previewPlayer.pause(),previewPlayer.currentTime=0,music.play().catch(()=>{})}function openPreview(e,t,a,pw=40,pe=100){sfx(),screens.explorer.classList.remove("active"),screens.preview.classList.add("active"),document.getElementById("previewTitle").innerText=e,document.getElementById("coverImg").src=a,currentBeat={id:e,name:e,priceWav:pw,priceExcl:pe},document.getElementById("previewPrice").innerText=`WAV Lease $${pw} • Exclusive $${pe}`,music.pause(),beatPreview.pause(),beatPreview.currentTime=0,previewPlayer.pause(),previewPlayer.currentTime=0,previewSrc.src=t,previewPlayer.load(),previewPlayer.play().catch(()=>{})}function saveCart(){localStorage.setItem("cart",JSON.stringify(cart)),updateCartUI()}function updateCartUI(){const e=cart.length;document.getElementById("cartCount").textContent=e,document.getElementById("cartCount2").textContent=e;const t=cart.reduce((e,t)=>e+t.price,0);document.getElementById("cartTotal").textContent=t;const a=document.getElementById("cartItems");0===cart.length?a.innerHTML='<div style="opacity:.7; margin:20px 0; text-align:center;">Cart is empty.</div>':a.innerHTML=cart.map((e,t)=>`\n          <div class="cart-item">\n            <div>\n              <div style="letter-spacing:1px;">${e.name}</div>\n              <div style="opacity:.65; font-size:12px;">${e.license}</div>\n            </div>\n            <div style="display:flex; gap:12px; align-items:center;">\n              <div>$${e.price}</div>\n              <div style="cursor:pointer; opacity:.7;" onclick="removeCartItem(${t})">Remove</div>\n            </div>\n          </div>\n        `).join("")}function openCart(){sfx(),screens.cartOverlay.classList.add("active"),updateCartUI()}function closeCart(){sfx(),screens.cartOverlay.classList.remove("active")}function removeCartItem(e){cart.splice(e,1),saveCart()}function clearCart(){confirm("Clear entire cart?")&&(cart=[],saveCart())}function addToCart(e){if(!currentBeat.id)return;const t="EXCL"===e?"Exclusive":"WAV Lease",a="EXCL"===e?currentBeat.priceExcl:currentBeat.priceWav;cart=cart.filter(e=>e.id!==currentBeat.id),cart.push({id:currentBeat.id,name:currentBeat.name,license:t,price:a}),saveCart(),openCart()}async function checkout(){if(0===cart.length)return void alert("Cart is empty.");music.pause(),beatPreview.pause(),previewPlayer.pause();try{const e=await fetch("/.netlify/functions/create-checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items:cart})}),t=await e.json();if(!e.ok||!t.url)return void alert("Checkout error: "+(t.error||"unknown"));window.location.href=t.url}catch(e){alert("Network error: "+e.message)}}function updateTime(){const e=new Date().toLocaleTimeString([],[{hour:"2-digit",minute:"2-digit",second:"2-digit",fractionalSecondDigits:2}]);document.getElementById("time").innerText=e,document.getElementById("time2").innerText=e}setInterval(updateTime,10),updateTime(),updateCartUI();
   </script>
-
 </body>
 </html>

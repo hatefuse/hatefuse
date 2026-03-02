@@ -1,19 +1,24 @@
-const Stripe = require("stripe");
-const { Resend } = require("resend");
-const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
-const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+// netlify/functions/stripe-webhook.js
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { Resend } = require('resend');
+const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+const r2 = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  },
+});
 
 exports.handler = async (event) => {
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
-  }
+  const sig = event.headers['stripe-signature'];
 
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-  const resend = new Resend(process.env.RESEND_API_KEY);
-
-  const sig = event.headers["stripe-signature"];
   let stripeEvent;
-
   try {
     stripeEvent = stripe.webhooks.constructEvent(
       event.body,
@@ -21,85 +26,81 @@ exports.handler = async (event) => {
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
+    console.error(`Webhook signature verification failed: ${err.message}`);
     return { statusCode: 400, body: `Webhook Error: ${err.message}` };
   }
 
-  if (stripeEvent.type !== "checkout.session.completed") {
-    return { statusCode: 200, body: "Ignored" };
-  }
-
-  try {
+  if (stripeEvent.type === 'checkout.session.completed') {
     const session = stripeEvent.data.object;
+    const email = session.customer_details?.email;
 
-    const buyerEmail =
-      session.customer_details?.email ||
-      session.customer_email;
-
-    if (!buyerEmail) {
-      return { statusCode: 400, body: "No customer email found." };
+    if (!email) {
+      console.error('No email found in session');
+      return { statusCode: 200 };
     }
 
-    const items = JSON.parse(session.metadata?.items || "[]");
-    if (!Array.isArray(items) || items.length === 0) {
-      return { statusCode: 400, body: "No items in metadata." };
+    let beats = [];
+    try {
+      beats = JSON.parse(session.metadata?.beats || '[]');
+    } catch (err) {
+      console.error('Failed to parse metadata.beats:', err);
     }
 
-    const s3 = new S3Client({
-      region: "auto",
-      endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-      credentials: {
-        accessKeyId: process.env.R2_ACCESS_KEY_ID,
-        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-      },
-    });
+    const downloads = await Promise.all(
+      beats.map(async (beat) => {
+        const beatNumber = beat.id.split(' ')[0]; // e.g. '007'
+        const fileKey = `full/${beatNumber}_full.wav`;
 
-    // IMPORTANT: Upload your zips to R2 like:
-    // full/001_wav.zip
-    // full/001_exclusive.zip
-    const keyFor = (name, license) => {
-      const num = String(name).trim().split(" ")[0]; // "001"
-      const lic = license === "Exclusive" ? "exclusive" : "wav";
-      return `full/${num}_${lic}.zip`;
-    };
+        try {
+          const command = new GetObjectCommand({
+            Bucket: process.env.R2_BUCKET,
+            Key: fileKey,
+          });
 
-    const links = [];
-    for (const it of items) {
-      const Key = keyFor(it.name, it.license);
+          const signedUrl = await getSignedUrl(r2, command, { expiresIn: 604800 }); // 7 days
 
-      const cmd = new GetObjectCommand({
-        Bucket: process.env.R2_BUCKET,
-        Key,
+          return {
+            name: beat.name || beat.id,
+            license: beat.license,
+            url: signedUrl,
+          };
+        } catch (err) {
+          console.error(`Failed to sign URL for ${fileKey}:`, err);
+          return null;
+        }
+      })
+    ).then(results => results.filter(Boolean));
+
+    try {
+      const { data, error } = await resend.emails.send({
+        from: 'fuse@hatefuse.com',  // ← Updated to your email
+        to: email,
+        subject: 'Your @hatefuse Beat Download 🔥',
+        html: `
+          <h2>Thanks for copping!</h2>
+          <p>Your download links (expire in 7 days — save them!):</p>
+          <ul>
+            ${downloads.map(d => `
+              <li>
+                ${d.name} (${d.license}): 
+                <a href="${d.url}" style="color:#00ff9d;">Download WAV</a>
+              </li>
+            `).join('')}
+          </ul>
+          <p>License terms: Non-exclusive lease for WAV. Full rights for exclusive. Credit @hatefuse if used publicly.</p>
+          <p>Questions? Hit me on instagram @hatefuse.</p>
+        `,
       });
 
-      const url = await getSignedUrl(s3, cmd, { expiresIn: 60 * 60 * 24 }); // 24h
-      links.push({ name: it.name, license: it.license, url });
+      if (error) {
+        console.error('Resend error:', error);
+      } else {
+        console.log('Email sent to', email, data);
+      }
+    } catch (err) {
+      console.error('Failed to send email:', err);
     }
-
-    const html = `
-      <div style="font-family:Arial,sans-serif;">
-        <h2>Your hatefuse download links</h2>
-        <p>Links expire in 24 hours.</p>
-        <ul>
-          ${links.map(l => `
-            <li>
-              <b>${l.name}</b> — ${l.license}<br/>
-              <a href="${l.url}">Download</a>
-            </li>
-          `).join("")}
-        </ul>
-        <p>If anything breaks, reply to this email: ${process.env.FROM_EMAIL}</p>
-      </div>
-    `;
-
-    await resend.emails.send({
-      from: process.env.FROM_EMAIL,
-      to: buyerEmail,
-      subject: "Your hatefuse beat download",
-      html,
-    });
-
-    return { statusCode: 200, body: "OK" };
-  } catch (err) {
-    return { statusCode: 500, body: `Server Error: ${err.message}` };
   }
+
+  return { statusCode: 200 };
 };
