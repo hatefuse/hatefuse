@@ -77,13 +77,15 @@ export default async function handler(req, res) {
       const key = getR2KeyFromName(item.name);
 
       const signedUrl = await getSignedUrl(
-        s3,
-        new GetObjectCommand({
-          Bucket: process.env.R2_BUCKET,
-          Key: key,
-        }),
-        { expiresIn: 60 * 60 * 24 }
-      );
+  s3,
+  new GetObjectCommand({
+    Bucket: process.env.R2_BUCKET,
+    Key: key,
+    ResponseContentDisposition: `attachment; filename="${key}"`,
+    ResponseContentType: "audio/wav"
+  }),
+  { expiresIn: 60 * 60 * 24 }
+);
 
       links.push({
         name: item.name,
@@ -120,6 +122,7 @@ export default async function handler(req, res) {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 }
+
 
 
 
