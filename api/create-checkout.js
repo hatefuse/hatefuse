@@ -1,21 +1,27 @@
-import stripePackage from 'stripe';
+import stripe from 'stripe';
 
-const stripe = stripePackage(process.env.STRIPE_SECRET_KEY);
+const stripeClient = stripe(process.env.STRIPE_SECRET_KEY);
 
 export default async function handler(request) {
+  if (request.method !== 'POST') {
+    return new Response('Method Not Allowed', { status: 405 });
+  }
+
   try {
     const { items } = await request.json();
 
     const lineItems = items.map(item => ({
       price_data: {
         currency: 'usd',
-        product_data: { name: `${item.name} - ${item.license}` },
+        product_data: {
+          name: `${item.name} - ${item.license}`,
+        },
         unit_amount: item.price * 100,
       },
       quantity: 1,
     }));
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await stripeClient.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',

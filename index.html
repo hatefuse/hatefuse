@@ -13,18 +13,34 @@
       font-family: Arial, sans-serif;
       overflow: hidden;
       height: 100vh;
-      background: #000 url('hatefuse-bg.webp') no-repeat center center fixed;
-      background-size: cover;
       position: relative;
+      background: #000;
     }
-    body::after {
-      content: "";
+
+    #bg-container {
+      position: fixed;
+      inset: 0;
+      background: url('hatefuse-bg.webp') no-repeat center center;
+      background-size: cover;
+      z-index: -3;
+    }
+
+    #bg-overlay {
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.65);
       pointer-events: none;
       z-index: -2;
     }
+
+    @media (max-width: 768px) {
+      #bg-container,
+      #bg-overlay {
+        position: absolute;
+        background-attachment: scroll;
+      }
+    }
+
     .screen {
       position: fixed;
       inset: 0;
@@ -185,6 +201,9 @@
   </style>
 </head>
 <body>
+  <div id="bg-container"></div>
+  <div id="bg-overlay"></div>
+
   <div id="intro" class="screen active">
     <img id="spin" src="spin.gif" alt="Loading animation">
     <img id="enter" src="enter.png" alt="Click to enter">
