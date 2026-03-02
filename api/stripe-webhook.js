@@ -1,3 +1,5 @@
+export const runtime = "nodejs";
+
 import Stripe from "stripe";
 import { Resend } from "resend";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
@@ -15,7 +17,6 @@ const s3 = new S3Client({
   },
 });
 
-// Needed for Stripe signature verification
 export const config = {
   api: {
     bodyParser: false,
@@ -31,7 +32,6 @@ function getRawBody(req) {
   });
 }
 
-// Extracts "001" from "001 @hatefuse"
 function getR2KeyFromName(name) {
   const beatNumber = name.substring(0, 3);
   return `${beatNumber}_full.wav`;
@@ -82,7 +82,7 @@ export default async function handler(req, res) {
           Bucket: process.env.R2_BUCKET,
           Key: key,
         }),
-        { expiresIn: 60 * 60 * 24 } // 24 hours
+        { expiresIn: 60 * 60 * 24 }
       );
 
       links.push({
@@ -120,5 +120,6 @@ export default async function handler(req, res) {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 }
+
 
 
