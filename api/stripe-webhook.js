@@ -1,7 +1,7 @@
-const Stripe = require("stripe");
-const { Resend } = require("resend");
-const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
-const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+import Stripe from "stripe";
+import { Resend } from "resend";
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -15,6 +15,13 @@ const s3 = new S3Client({
   },
 });
 
+// Needed for Stripe signature verification
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 function getRawBody(req) {
   return new Promise((resolve, reject) => {
     const chunks = [];
@@ -24,13 +31,13 @@ function getRawBody(req) {
   });
 }
 
-// Extracts 001 from "001 @hatefuse"
+// Extracts "001" from "001 @hatefuse"
 function getR2KeyFromName(name) {
   const beatNumber = name.substring(0, 3);
   return `${beatNumber}_full.wav`;
 }
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).send("Method Not Allowed");
   }
@@ -53,7 +60,6 @@ module.exports = async (req, res) => {
 
     const buyerEmail = session.customer_details?.email;
     if (!buyerEmail) {
-      console.error("No buyer email found.");
       return res.status(200).json({ received: true });
     }
 
@@ -62,7 +68,6 @@ module.exports = async (req, res) => {
       : [];
 
     if (!items.length) {
-      console.error("No items in metadata.");
       return res.status(200).json({ received: true });
     }
 
@@ -114,5 +119,6 @@ module.exports = async (req, res) => {
     console.error("Webhook error:", err);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
-};
+}
+
 
