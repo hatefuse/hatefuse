@@ -13,10 +13,15 @@
       font-family: Arial, sans-serif;
       overflow: hidden;
       height: 100vh;
+      position: relative;
+    }
+    #bg-container {
+      position: fixed;
+      inset: 0;
       background: #000 url('hatefuse-bg.webp') no-repeat center center;
       background-size: cover;
       background-attachment: fixed;
-      position: relative;
+      z-index: -3;
     }
     #bg-overlay {
       position: fixed;
@@ -185,6 +190,7 @@
   </style>
 </head>
 <body>
+  <div id="bg-container"></div>
   <div id="bg-overlay"></div>
 
   <div id="intro" class="screen active">
