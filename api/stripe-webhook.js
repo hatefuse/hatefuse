@@ -34,21 +34,18 @@ export default async function handler(request) {
     const session = event.data.object;
     const email = session.customer_details?.email;
 
-    if (!email) {
-      console.warn('No email in session');
-      return new Response('No email', { status: 200 });
-    }
+    if (!email) return new Response('No email', { status: 200 });
 
     let beats = [];
     try {
       beats = JSON.parse(session.metadata?.beats || '[]');
     } catch (err) {
-      console.error('Failed to parse beats metadata:', err);
+      console.error('Metadata parse error:', err);
     }
 
     const downloads = await Promise.all(
       beats.map(async (beat) => {
-        const beatNumber = beat.id.split(' ')[0]; // e.g. '001' from '001 @hatefuse'
+        const beatNumber = beat.id.split(' ')[0];
         const fileKey = `full/${beatNumber}_full.wav`;
 
         try {
@@ -57,19 +54,18 @@ export default async function handler(request) {
             Key: fileKey,
           });
 
-          const signedUrl = await getSignedUrl(r2, command, { expiresIn: 604800 }); // 7 days
-
+          const signedUrl = await getSignedUrl(r2, command, { expiresIn: 604800 });
           return {
             name: beat.name || beat.id,
             license: beat.license,
             url: signedUrl,
           };
         } catch (err) {
-          console.error(`Failed to sign URL for ${fileKey}:`, err);
+          console.error(`Sign URL failed for ${fileKey}:`, err);
           return null;
         }
       })
-    ).then(results => results.filter(Boolean));
+    ).then(r => r.filter(Boolean));
 
     try {
       await resend.emails.send({
@@ -78,22 +74,17 @@ export default async function handler(request) {
         subject: 'Your @hatefuse Beat Download 🔥',
         html: `
           <h2>Thanks for copping!</h2>
-          <p>Your download links (expire in 7 days — save them!):</p>
+          <p>Your download links (expire in 7 days):</p>
           <ul>
-            ${downloads.map(d => `
-              <li>
-                ${d.name} (${d.license}): 
-                <a href="${d.url}" style="color:#00ff9d;">Download WAV</a>
-              </li>
-            `).join('')}
+            ${downloads.map(d => `<li>${d.name} (${d.license}): <a href="${d.url}">Download</a></li>`).join('')}
           </ul>
-          <p>License: Non-exclusive lease for WAV. Full rights for exclusive. Credit @hatefuse if used publicly.</p>
+          <p>License: Non-exclusive lease for WAV. Full rights for exclusive. Credit @hatefuse.</p>
           <p>Questions? DM @hatefuse on X.</p>
         `,
       });
       console.log(`Email sent to ${email}`);
     } catch (err) {
-      console.error('Failed to send email:', err);
+      console.error('Email failed:', err);
     }
   }
 
