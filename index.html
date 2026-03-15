@@ -536,6 +536,7 @@ function backToHome(){
 // Gallery open function
 function openGallery(){
   sfx();
+  document.querySelectorAll("#gallery video").forEach(v => { v.load(); });
   screens.home.classList.remove("active");
   document.getElementById("gallery").classList.add("active");
 }
