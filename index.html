@@ -480,19 +480,19 @@
       <div class="gallery-item" onclick="openLightbox(10)"><img src="gallery/art11.webp" alt="Art 11"></div>
       <div class="gallery-item" onclick="openLightbox(11)"><img src="gallery/art12.webp" alt="Art 12"></div>
 
-      <div class="gallery-item">
+      <div class="gallery-item" onclick="openVideo('gallery/visual1.mp4')">
         <video autoplay muted loop playsinline poster="gallery/visual1.mp4">
           <source src="gallery/visual1.mp4" type="video/mp4">
         </video>
         <div class="gallery-item-label">Visualizer</div>
       </div>
-      <div class="gallery-item">
+      <div class="gallery-item" onclick="openVideo('gallery/visual2.mp4')">
         <video autoplay muted loop playsinline poster="gallery/visual2.mp4">
           <source src="gallery/visual2.mp4" type="video/mp4">
         </video>
         <div class="gallery-item-label">Visualizer</div>
       </div>
-      <div class="gallery-item">
+      <div class="gallery-item" onclick="openVideo('gallery/visual3.mp4')">
         <video autoplay muted loop playsinline poster="gallery/visual3.mp4">
           <source src="gallery/visual3.mp4" type="video/mp4">
         </video>
@@ -521,6 +521,7 @@ gallery:document.getElementById("gallery")
 },music=document.getElementById("bgMusic"),beatPreview=document.getElementById("beatPreview"),previewPlayer=document.getElementById("previewPlayer"),previewSrc=document.getElementById("previewSrc"),clickSound=document.getElementById("clickSound"),startupSound=document.getElementById("startupSound"),bootFill=document.getElementById("bootFill");let cart=JSON.parse(localStorage.getItem("cart")||"[]"),currentBeat={id:null,name:null,priceWav:40,priceExcl:100};const urlParams=new URLSearchParams(window.location.search);if(urlParams.has("session_id")){screens.intro.classList.remove("active"),screens.boot.classList.remove("active"),screens.home.classList.add("active"),setTimeout(()=>{alert("Payment successful! 🔥 Your download & license are being emailed. Check spam if not in 10 mins.")},500),history.replaceState(null,null,window.location.pathname)}document.getElementById("enter").onclick=()=>{clickSound.currentTime=0,clickSound.play().catch(()=>{}),screens.intro.classList.remove("active"),screens.boot.classList.add("active"),bootFill.style.width="100%",startupSound.volume=1,startupSound.currentTime=0,startupSound.play().catch(()=>{}),setTimeout(()=>{let step=0;const fadeOut=setInterval(()=>{step++,startupSound.volume=Math.max(0,1-step/25),step>=25&&(clearInterval(fadeOut),startupSound.pause(),startupSound.currentTime=0,setTimeout(()=>{screens.boot.classList.remove("active"),screens.home.classList.add("active"),music.volume=0,music.play().catch(()=>{});let v=0;const fadeIn=setInterval(()=>{v+=.05,music.volume=v,v>=1&&clearInterval(fadeIn)},120)},2e3))},40)},1400)};function sfx(){clickSound.currentTime=0,clickSound.play().catch(()=>{})}function openLink(e){sfx(),window.open(e,"_blank")}function openExplorer(){sfx(),screens.home.classList.remove("active"),screens.explorer.classList.add("active")}
 function backToHome(){
   sfx();
+  document.querySelectorAll("#gallery video").forEach(v => v.pause());
   screens.preview.classList.remove("active");
   screens.explorer.classList.remove("active");
   screens.gallery.classList.remove("active");
@@ -553,10 +554,30 @@ function openLightbox(index){
   document.getElementById('lightbox').classList.add('active');
   document.getElementById('lightbox').style.display = 'flex';
 }
+function openVideo(src){
+  music.pause();
 
+  const lightbox = document.getElementById("lightbox");
+
+  const media = document.createElement("video");
+  media.src = src;
+  media.controls = true;
+  media.autoplay = true;
+  media.style.maxWidth = "92%";
+  media.style.maxHeight = "85vh";
+  media.style.borderRadius = "12px";
+
+  const old = document.getElementById("lightbox-img");
+  old.replaceWith(media);
+  media.id = "lightbox-img";
+
+  lightbox.classList.add("active");
+  lightbox.style.display = "flex";
+}
 function closeLightbox(){
   document.getElementById('lightbox').classList.remove('active');
   setTimeout(() => { document.getElementById('lightbox').style.display = 'none'; }, 300);
+  music.play().catch(()=>{});
 }
 
 function changeImage(direction){
@@ -575,6 +596,23 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowLeft') changeImage(-1);
   if (e.key === 'ArrowRight') changeImage(1);
   if (e.key === 'Escape') closeLightbox();
+});
+let touchStartX = 0;
+
+document.getElementById("lightbox").addEventListener("touchstart", e=>{
+  touchStartX = e.changedTouches[0].screenX;
+});
+
+document.getElementById("lightbox").addEventListener("touchend", e=>{
+  let touchEndX = e.changedTouches[0].screenX;
+
+  if(touchEndX < touchStartX - 50){
+    changeImage(1);
+  }
+
+  if(touchEndX > touchStartX + 50){
+    changeImage(-1);
+  }
 });
   </script>
 </body>
